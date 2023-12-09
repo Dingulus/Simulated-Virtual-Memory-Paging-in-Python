@@ -20,6 +20,7 @@ with open(arg1) as f:
     for l in f:
         l = l.split()
 
+        # Page Fault
         if (int(l[0]), int(l[1]) >> 9) not in mainMemory:
             # Main Memory can be filled
             if len(mainMemory) < 32:
@@ -32,6 +33,7 @@ with open(arg1) as f:
 
             # Main Memory is Full
             else:
+                # Page Replacement Algorithm
                 index = random.randint(0, 31)
                 mainMemory[index] = (int(l[0]), int(l[1]) >> 9)
                 mainMemoryReferenceBit[index] = 1

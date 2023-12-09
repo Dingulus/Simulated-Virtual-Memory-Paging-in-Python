@@ -14,8 +14,38 @@ diskReference = 0
 dirtyDiskWrite = 0
 pageFaultCounter = 0
 
-seed_value = 7
-random.seed(seed_value)
+LRU_counter = 0
+LRU_MEM_TIME = []
+LRU_SAME_TIME = []
+
+
+def LRU_FIND_INDEX():
+    min_time = min(LRU_MEM_TIME)
+    lru_dup = False
+
+    # duplicate last time unit value check
+    id = 0
+    for t in LRU_MEM_TIME:
+        if t == min_time:
+            LRU_SAME_TIME.append((index, mainMemoryDirtyBit[index], min_time))
+            lru_dup = True
+        id += 1
+
+    # duplicate last time unit decision
+    if lru_dup is False:
+        return LRU_MEM_TIME.index(min_time)
+    else:
+        dirty_check = True in ((db == 0 or db == 1) for db in [ind[1] for ind in LRU_SAME_TIME])
+        if dirty_check:
+            return [ind[1] for ind in mainMemory].index(min([ind[1] for ind in mainMemory]))
+        else:
+            for j in [ind[0] for ind in LRU_SAME_TIME]:
+                if mainMemoryDirtyBit[j] == 0:
+                    return j
+
+    LRU_SAME_TIME.clear()
+
+
 with open(arg1) as f:
     for l in f:
         l = l.split()
@@ -25,6 +55,7 @@ with open(arg1) as f:
             if len(mainMemory) < 32:
                 mainMemory.append((int(l[0]), int(l[1]) >> 9))
                 mainMemoryReferenceBit.append(1)
+                LRU_MEM_TIME.append(LRU_counter)
                 if l[2] == 'W':
                     mainMemoryDirtyBit.append(1)
                 else:
@@ -32,8 +63,10 @@ with open(arg1) as f:
 
             # Main Memory is Full
             else:
-                index = random.randint(0, 31)
+                # Page Replacement Algorithm
+                index = LRU_FIND_INDEX()
                 mainMemory[index] = (int(l[0]), int(l[1]) >> 9)
+                LRU_MEM_TIME[index] += 1
                 mainMemoryReferenceBit[index] = 1
 
                 if mainMemoryDirtyBit[index] == 1:
@@ -47,9 +80,15 @@ with open(arg1) as f:
             pageFaultCounter += 1
             diskReference += 1
 
+        else:
+            index = mainMemory.index((int(l[0]), int(l[1]) >> 9))
+            LRU_MEM_TIME[index] += 1
+
         if l[2] == 'W':
             index = mainMemory.index((int(l[0]), int(l[1]) >> 9))
             mainMemoryDirtyBit[index] = 1
+
+        LRU_counter += 1
 
 totalDiskReference = diskReference + dirtyDiskWrite
 
