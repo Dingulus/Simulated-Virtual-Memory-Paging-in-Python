@@ -20,7 +20,7 @@ with open(arg1) as f:
         l = l.split()
 
         if (int(l[0]), int(l[1]) >> 9) not in mainMemory:
-            if len(mainMemory) < 32:
+            if len(mainMemory) < 32: #Populates mainMemory if not full. MM can hold 32 entries [0-31]. Considered as a page fault.
                 mainMemory.append((int(l[0]), int(l[1]) >> 9))
                 mainMemoryReferenceBit.append(1)
                 FIFO_tracker.append(FIFO_count)
@@ -58,6 +58,7 @@ totalDiskReference = diskReference + dirtyDiskWrite
 # print(pageFaultCounter)
 # print(mainMemoryReferenceBit)
 # print(mainMemoryDirtyBit)
-print(dirtyDiskWrite)
-print(diskReference)
-print(totalDiskReference)
+print(f"# of page faults: {pageFaultCounter}")
+print(f"# of disk references: {diskReference}")
+print(f"# of dirty disk writes: {dirtyDiskWrite}")
+print(f"# of total disk references: {totalDiskReference}")
